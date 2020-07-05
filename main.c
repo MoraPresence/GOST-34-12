@@ -14,7 +14,7 @@ unsigned getBinaryLenght(unsigned num){
 }
 unsigned getRemainder(unsigned int dividend, unsigned int divisor) {
     unsigned tmpDivisor = 0;
-    while (divisor < dividend) {
+    while (dividend >= divisor) {
         tmpDivisor = divisor;
         tmpDivisor <<= getBinaryLenght(dividend) - getBinaryLenght(tmpDivisor);
         dividend ^= tmpDivisor;
