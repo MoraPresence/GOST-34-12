@@ -41,7 +41,7 @@ unsigned mul(unsigned a, unsigned b, unsigned p) {
 
 int main() {
 
-    printf("%d\n", mul(83, 9, 0b111000011));
-    printf("%d", summ(83, 9));
+    printf("%x\n", mul(83, 9, 0b111000011));
+    printf("%x", summ(83, 9));
     return 0;
 }
