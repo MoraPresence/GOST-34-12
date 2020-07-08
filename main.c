@@ -17,9 +17,10 @@ unsigned getRemainder(unsigned dividend, unsigned divisor) {
     unsigned tmpDivisor = 0;
     while (dividend >= divisor) {
         tmpDivisor = divisor;
-        while (((dividend ^ tmpDivisor) >= dividend || ((dividend ^ tmpDivisor) >= tmpDivisor)))
-            tmpDivisor <<= 1;
-        dividend ^= tmpDivisor;
+        tmpDivisor <<= sizeof(tmpDivisor)*8 - 9;
+        if ((dividend ^ tmpDivisor) <= dividend)
+            dividend ^= tmpDivisor;
+        tmpDivisor >>= 1;
     }
     return dividend;
 }
