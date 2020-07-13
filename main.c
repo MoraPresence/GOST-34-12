@@ -113,15 +113,15 @@ uint128 L(uint128 a) {
     return c;
 }
 
-uint8_t getRemainder(uint16_t  dividend, uint16_t divisor) {
-    uint16_t tmpDivisor = divisor;
+uint8_t getRemainder(uint16_t dividend, uint16_t divisor) {
     uint16_t mask = 0x8000;
-    tmpDivisor <<= 7;
-    while (dividend >= divisor) {
+    divisor <<= 7;
+    while (dividend & 0xff00) {
+       // printf("a=0x%x, d=0x%x, m=0x%x (%x)\n", dividend, divisor, mask, (dividend & 0xff00));
         if (dividend & mask)
-            dividend ^= tmpDivisor;
+            dividend ^= divisor;
         mask >>= 1;
-        tmpDivisor >>= 1;
+        divisor >>= 1;
     }
     return dividend;
 }
