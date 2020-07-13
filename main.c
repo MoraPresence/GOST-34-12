@@ -186,8 +186,8 @@ int main() {
     printf("\n");
     uint128 a1;
 
-    a1.qw[0] = 0x0000000000000000;
-    a1.qw[1] = 0x64a5940000000000;
+    a1.qw[0] = 0x8b7b68f66b513c13;
+    a1.qw[1] = 0x0e93691a0cfc6040;
     c = L(a1);
     for (i = 0; i < 16; ++i) {
         printf("%02x", c.b[15 - i]); //b66cd8887d38e8d77765aeea0c9a7efc
