@@ -163,9 +163,9 @@ uint8_t fastMult(uint8_t a, uint8_t b) {
 
 int main() {
     fillMultTable();
-    printf("%x\n", mult(83, 9, 0b111000011));
-    printf("%x\n", fastMult(0x94, 133));
-    printf("%x\n", summ(83, 9));
+    printf("0x%x\n", mult(83, 9, 0b111000011));
+    printf("0x%x\n", fastMult(0x94, 133));
+    printf("0x%x\n", summ(83, 9));
     uint128 a;
     a.qw[0] = 0x1122334455667700;
     a.qw[1] = 0xffeeddccbbaa9988;
@@ -181,7 +181,7 @@ int main() {
     d.qw[1] = 0x64a5940000000000;
     c = R(d);
     for (i = 0; i < 16; ++i) {
-        printf("%02x", c.b[15 - i]); //b66cd8887d38e8d77765aeea0c9a7efc
+        printf("%02x", c.b[15 - i]); //0d64a594000000000000000000000000
     }
     printf("\n");
     uint128 a1;
@@ -190,7 +190,7 @@ int main() {
     a1.qw[1] = 0x0e93691a0cfc6040;
     c = L(a1);
     for (i = 0; i < 16; ++i) {
-        printf("%02x", c.b[15 - i]); //b66cd8887d38e8d77765aeea0c9a7efc
+        printf("%02x", c.b[15 - i]); //e6a8094fee0aa204fd97bcb0b44b8580
     }
     return 0;
 }
