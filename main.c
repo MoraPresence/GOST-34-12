@@ -16,7 +16,7 @@
 //    return lut[(unsigned int) (v * 0x07C4ACDDU) >> 27] + 1;
 //} интересный способ
 
-unsigned tableMult[256][256];
+unsigned char tableMult[256][256];
 
 unsigned pi[256] = {252, 238, 221, 17, 207, 110, 49, 22, 251, 196, 250, 218, 35, 197, 4, 77, 233,
                     119, 240, 219, 147, 46, 153, 186, 23, 54, 241, 187, 20, 205, 95, 193, 249, 24, 101,
@@ -51,23 +51,21 @@ uint128 R(uint128 a);
 
 uint128 L(uint128 a);
 
-unsigned getRemainder(unsigned dividend, unsigned divisor);
+uint8_t getRemainder(uint8_t dividend, uint8_t divisor);
 
 unsigned summ(unsigned a, unsigned b);
 
-unsigned mul(unsigned a, unsigned b, unsigned p);
+uint8_t mult(uint8_t a, uint8_t b, uint16_t p);
 
 void **fillMultTable();
 
-unsigned fastMult(unsigned a, unsigned b);
+uint8_t fastMult(uint8_t a, uint8_t b);
 //----------------------------------------------------------------------------------------------------------------
 
 uint128 X(uint128 a, uint128 b) {
     uint128 c;
-    int i;
-    for (i = 0; i < 2; ++i) {
-        c.qw[i] = a.qw[i] ^ b.qw[i];
-    }
+    c.qw[0] = a.qw[0] ^ b.qw[0];
+    c.qw[1] = a.qw[1] ^ b.qw[1];
     return c;
 }
 
@@ -87,11 +85,11 @@ uint128 R(uint128 a) {
     for (i = 0; i < 16; ++i) {
 //        printf("%x %d ", a.b[i], i);
 //        printf("%d\n", tableForL[i]);
-        sum ^= fastMult(a.b[i], tableForL[i]);
+        sum ^= fastMult(a.b[15 - i], tableForL[i]);
     }
-    c.b[0] = sum;
+    c.b[15] = sum;
     for (i = 1; i < 16; ++i) {
-        c.b[i] = a.b[i - 1];
+        c.b[15 - i] = a.b[16 - i];
     }
     return c;
 }
@@ -108,8 +106,7 @@ uint128 L(uint128 a) {
         for (j = 0; j < 16; ++j) {
             tmpB.b[j] = tmp[j+i];
         }
-        printf(">>>%x",R(tmpB).b[0] );
-        tmp[i+16] = R(tmpB).b[0];
+        tmp[i+16] = R(tmpB).b[15];
     }
 
     for (i = 0; i < 16; ++i) {
@@ -118,13 +115,13 @@ uint128 L(uint128 a) {
     return c;
 }
 
-unsigned getRemainder(unsigned dividend, unsigned divisor) {
-    unsigned tmpDivisor = 0;
+uint8_t getRemainder(uint8_t dividend, uint8_t divisor) {
+    uint8_t tmpDivisor = divisor;
+    tmpDivisor <<= 7;
     while (dividend >= divisor) {
-        tmpDivisor = divisor;
-        while (((dividend ^ tmpDivisor) >= dividend || ((dividend ^ tmpDivisor) >= tmpDivisor)))
-            tmpDivisor <<= 1;
+        if ((dividend ^ tmpDivisor) <= dividend )
         dividend ^= tmpDivisor;
+        tmpDivisor >>= 1;
     }
     return dividend;
 }
@@ -133,8 +130,8 @@ unsigned summ(unsigned a, unsigned b) {
     return a ^ b;
 }
 
-unsigned mul(unsigned a, unsigned b, unsigned p) {
-    unsigned x = 0;
+uint8_t mult(uint8_t a, uint8_t b, uint16_t p) {
+    uint16_t x = 0;
     while (b != 0) {
         if ((b & 0x1) == 0x1)
             x ^= a;
@@ -145,8 +142,8 @@ unsigned mul(unsigned a, unsigned b, unsigned p) {
 }
 
 void **fillMultTable() {
-    unsigned i;
-    unsigned j;
+    uint16_t i = 0;
+    uint16_t j = 0;
     memset(tableMult, 0, 256 * sizeof(unsigned *));
     for (i = 0; i < 256; ++i) {
         memset(tableMult[i], 0, 256 * sizeof(unsigned));
@@ -154,48 +151,35 @@ void **fillMultTable() {
 
     for (i = 0; i < 256; ++i) {
         for (j = 0; j < 256; ++j) {
-            tableMult[i][j] = mul(i, j, 0b111000011);
+            tableMult[i][j] = mult(i, j, 0b111000011);
         }
     }
+    return NULL;
 }
 
-unsigned fastMult(unsigned a, unsigned b) {
+uint8_t fastMult(uint8_t a, uint8_t b) {
     return tableMult[a][b];
 }
 
 int main() {
     fillMultTable();
-    printf("%x\n", mul(83, 9, 0b111000011));
+    printf("%x\n", mult(83, 9, 0b111000011));
     printf("%x\n", fastMult(0x94, 133));
     printf("%x\n", summ(83, 9));
     uint128 a;
-    a.b[0] = 0xff;
-    a.b[1] = 0xee;
-    a.b[2] = 0xdd;
-    a.b[3] = 0xcc;
-    a.b[4] = 0xbb;
-    a.b[5] = 0xaa;
-    a.b[6] = 0x99;
-    a.b[7] = 0x88;
-    a.b[8] = 0x11;
-    a.b[9] = 0x22;
-    a.b[10] = 0x33;
-    a.b[11] = 0x44;
-    a.b[12] = 0x55;
-    a.b[13] = 0x66;
-    a.b[14] = 0x77;
-    a.b[15] = 0x00;
+    a.qw[0]=0x1122334455667700;
+    a.qw[1]=0xffeeddccbbaa9988;
     uint128 c = S(a);
     int i;
-    for (i = 0; i < 16; ++i) {
-        printf("%x", c.b[i]); //b66cd8887d38e8d77765aeea0c9a7efc
+    for (i = 0; i < 2; ++i) {
+        printf("%016llx", c.qw[1 - i]); //b66cd8887d38e8d77765aeea0c9a7efc
     }
     printf("\n");
     uint128 d;
 
-    d.b[0] = 0x64;
-    d.b[1] = 0xa5;
-    d.b[2] = 0x94;
+    d.b[0] = 0x00;
+    d.b[1] = 0x00;
+    d.b[2] = 0x00;
     d.b[3] = 0x00;
     d.b[4] = 0x00;
     d.b[5] = 0x00;
@@ -206,35 +190,21 @@ int main() {
     d.b[10] = 0x00;
     d.b[11] = 0x00;
     d.b[12] = 0x00;
-    d.b[13] = 0x00;
-    d.b[14] = 0x00;
-    d.b[15] = 0x00;
+    d.b[13] = 0x94;
+    d.b[14] = 0xa5;
+    d.b[15] = 0x64;
     c = R(d);
     for (i = 0; i < 16; ++i) {
-        printf("%x", c.b[i]); //b66cd8887d38e8d77765aeea0c9a7efc
+        printf("%02x", c.b[15 - i]); //b66cd8887d38e8d77765aeea0c9a7efc
     }
     printf("\n");
     uint128 a1;
 
-    a1.b[0] = 0x64;
-    a1.b[1] = 0xa5;
-    a1.b[2] = 0x94;
-    a1.b[3] = 0x00;
-    a1.b[4] = 0x00;
-    a1.b[5] = 0x00;
-    a1.b[6] = 0x00;
-    a1.b[7] = 0x00;
-    a1.b[8] = 0x00;
-    a1.b[9] = 0x00;
-    a1.b[10] = 0x00;
-    a1.b[11] = 0x00;
-    a1.b[12] = 0x00;
-    a1.b[13] = 0x00;
-    a1.b[14] = 0x00;
-    a1.b[15] = 0x00;
+    a1.qw[0]=0x0000000000000000;
+    a1.qw[1]=0x64a5940000000000;
     c = L(a1);
     for (i = 0; i < 16; ++i) {
-        printf("%x", c.b[i]); //b66cd8887d38e8d77765aeea0c9a7efc
+        printf("%02x", c.b[15 - i]); //b66cd8887d38e8d77765aeea0c9a7efc
     }
     return 0;
 }
