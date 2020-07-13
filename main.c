@@ -51,11 +51,11 @@ uint128 R(uint128 a);
 
 uint128 L(uint128 a);
 
-uint8_t getRemainder(uint8_t dividend, uint8_t divisor);
+uint8_t getRemainder(uint16_t  dividend, uint16_t divisor);
 
 unsigned summ(unsigned a, unsigned b);
 
-uint8_t mult(uint8_t a, uint8_t b, uint16_t p);
+uint8_t mult(uint16_t a, uint16_t b, uint16_t p);
 
 void **fillMultTable();
 
@@ -83,8 +83,6 @@ uint128 R(uint128 a) {
     unsigned sum = 0;
     int i;
     for (i = 0; i < 16; ++i) {
-//        printf("%x %d ", a.b[i], i);
-//        printf("%d\n", tableForL[i]);
         sum ^= fastMult(a.b[15 - i], tableForL[i]);
     }
     c.b[15] = sum;
@@ -104,23 +102,25 @@ uint128 L(uint128 a) {
     memcpy(tmp, a.b, 16);
     for (i = 0; i < 16; ++i) {
         for (j = 0; j < 16; ++j) {
-            tmpB.b[j] = tmp[j+i];
+            tmpB.b[j] = tmp[j + i];
         }
-        tmp[i+16] = R(tmpB).b[15];
+        tmp[i + 16] = R(tmpB).b[15];
     }
 
     for (i = 0; i < 16; ++i) {
-        c.b[i] = tmp[i+16];
+        c.b[i] = tmp[i + 16];
     }
     return c;
 }
 
-uint8_t getRemainder(uint8_t dividend, uint8_t divisor) {
-    uint8_t tmpDivisor = divisor;
+uint8_t getRemainder(uint16_t  dividend, uint16_t divisor) {
+    uint16_t tmpDivisor = divisor;
+    uint16_t mask = 0x8000;
     tmpDivisor <<= 7;
     while (dividend >= divisor) {
-        if ((dividend ^ tmpDivisor) <= dividend )
-        dividend ^= tmpDivisor;
+        if (dividend & mask)
+            dividend ^= tmpDivisor;
+        mask >>= 1;
         tmpDivisor >>= 1;
     }
     return dividend;
@@ -130,7 +130,7 @@ unsigned summ(unsigned a, unsigned b) {
     return a ^ b;
 }
 
-uint8_t mult(uint8_t a, uint8_t b, uint16_t p) {
+uint8_t mult(uint16_t a, uint16_t b, uint16_t p) {
     uint16_t x = 0;
     while (b != 0) {
         if ((b & 0x1) == 0x1)
@@ -167,8 +167,8 @@ int main() {
     printf("%x\n", fastMult(0x94, 133));
     printf("%x\n", summ(83, 9));
     uint128 a;
-    a.qw[0]=0x1122334455667700;
-    a.qw[1]=0xffeeddccbbaa9988;
+    a.qw[0] = 0x1122334455667700;
+    a.qw[1] = 0xffeeddccbbaa9988;
     uint128 c = S(a);
     int i;
     for (i = 0; i < 2; ++i) {
@@ -177,22 +177,8 @@ int main() {
     printf("\n");
     uint128 d;
 
-    d.b[0] = 0x00;
-    d.b[1] = 0x00;
-    d.b[2] = 0x00;
-    d.b[3] = 0x00;
-    d.b[4] = 0x00;
-    d.b[5] = 0x00;
-    d.b[6] = 0x00;
-    d.b[7] = 0x00;
-    d.b[8] = 0x00;
-    d.b[9] = 0x00;
-    d.b[10] = 0x00;
-    d.b[11] = 0x00;
-    d.b[12] = 0x00;
-    d.b[13] = 0x94;
-    d.b[14] = 0xa5;
-    d.b[15] = 0x64;
+    d.qw[0] = 0x0000000000000000;
+    d.qw[1] = 0x64a5940000000000;
     c = R(d);
     for (i = 0; i < 16; ++i) {
         printf("%02x", c.b[15 - i]); //b66cd8887d38e8d77765aeea0c9a7efc
@@ -200,8 +186,8 @@ int main() {
     printf("\n");
     uint128 a1;
 
-    a1.qw[0]=0x0000000000000000;
-    a1.qw[1]=0x64a5940000000000;
+    a1.qw[0] = 0x0000000000000000;
+    a1.qw[1] = 0x64a5940000000000;
     c = L(a1);
     for (i = 0; i < 16; ++i) {
         printf("%02x", c.b[15 - i]); //b66cd8887d38e8d77765aeea0c9a7efc
