@@ -74,6 +74,12 @@ uint128 R(uint128 a);
 
 uint128 L(uint128 a);
 
+uint128 reverseS(uint128 a);
+
+uint128 reverseR(uint128 a);
+
+uint128 reverseL(uint128 a);
+
 uint8_t getRemainder(uint16_t dividend, uint16_t divisor);
 
 unsigned summ(unsigned a, unsigned b);
@@ -184,6 +190,14 @@ uint128 reverseL(uint128 a) {
     return c;
 }
 
+uint128 LSX(uint128 a, uint128 b) {
+    return L(S(X(a,b)));
+}
+
+uint128* F(uint128 a, uint128 b) {
+    
+}
+
 uint8_t getRemainder(uint16_t dividend, uint16_t divisor) {
     uint16_t mask = 0x8000;
     divisor <<= 7;
@@ -275,6 +289,17 @@ int main() {
     }
     printf("\n");
     c = reverseL(c);
+    for (i = 0; i < 16; ++i) {
+        printf("%02x", c.b[15 - i]);
+    }
+    printf("\n");
+    uint128 k1;
+    uint128 c1;
+    k1.qw[0] = 0x0011223344556677;
+    k1.qw[1] = 0x8899aabbccddeeff;
+    c1.qw[0] = 0x5d27bd10dd849401;
+    c1.qw[1] = 0x6ea276726c487ab8;
+    c = LSX(k1, c1);
     for (i = 0; i < 16; ++i) {
         printf("%02x", c.b[15 - i]);
     }
