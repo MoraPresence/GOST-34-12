@@ -80,6 +80,10 @@ uint128 reverseR(uint128 a);
 
 uint128 reverseL(uint128 a);
 
+uint128* F(uint128 c, uint128 k1, uint128 k2);
+
+uint128* itConsts();
+
 uint8_t getRemainder(uint16_t dividend, uint16_t divisor);
 
 unsigned summ(unsigned a, unsigned b);
@@ -192,6 +196,18 @@ uint128 reverseL(uint128 a) {
 
 uint128 LSX(uint128 a0, uint128 a1) {
     return L(S(X(a0,a1)));
+}
+
+uint128* itConsts() {
+    uint128* itConsts = malloc(32*sizeof(uint128));
+    int i;
+    for (i = 1; i <= 32; ++i) {
+        uint128 tmp;
+        tmp.qw[0] = i;
+        tmp.qw[1] = 0;
+        itConsts[i - 1] = L(tmp);
+    }
+    return itConsts;
 }
 
 uint128* F(uint128 c, uint128 k1, uint128 k2) {
@@ -323,5 +339,17 @@ int main() {
         printf("%02x", c.b[15 - i]);
     }
     printf("\n");
+    printf("___________________________________________");
+    printf("\n");
+    uint128* tmp2 = itConsts();
+    int j;
+    for (i = 0; i < 32; ++i) {
+        c = tmp2[i];
+        for (j = 0; j < 16; ++j) {
+            printf("%02x", c.b[15 - j]);
+        }
+        printf("\n");
+    }
+
     return 0;
 }
