@@ -80,7 +80,7 @@ uint128 reverseR(uint128 a);
 
 uint128 reverseL(uint128 a);
 
-uint128* F(uint128 c, uint128 k1, uint128 k2);
+uint128* F(uint128 c, uint128* k);
 
 uint128* itConsts();
 
@@ -210,11 +210,46 @@ uint128* itConsts() {
     return itConsts;
 }
 
-uint128* F(uint128 c, uint128 k1, uint128 k2) {
+uint128* F(uint128 c, uint128* k) {
     uint128* itKeys = malloc(2*sizeof(uint128));
-    itKeys[1] = k1;
-    itKeys[0] = X(LSX(k1, c), k2);
+    itKeys[1] = k[0];
+    itKeys[0] = X(LSX(k[0], c), k[1]);
     return itKeys;
+}
+
+uint128** expandKeys(uint128* key256, uint128* itConsts) {
+    uint128** Keys = malloc(5*sizeof(uint128*));
+    uint128* tmpKey256 = malloc(2*sizeof(uint128));
+    Keys[0] = key256;
+    memcpy(tmpKey256, key256, 2*sizeof(uint128));
+    int i;
+    int j;
+    for (i = 1; i <= 4; ++i) {
+        for (j = 1; j < 8; ++j) {
+            tmpKey256 =  F(itConsts[8*(i - 1) + (j - 1)], tmpKey256);
+        }
+        tmpKey256 =  F(itConsts[8*(i - 1) + 7], tmpKey256);
+        Keys[i] = tmpKey256;
+    }
+    return Keys;
+}
+
+uint128 crypto(uint128 a, uint128* k){
+    uint128* consts = itConsts();
+    uint128** keys = expandKeys(k , consts);
+    uint16_t i = 0;
+    uint16_t j = 0;
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 2; ++j) {
+           a = LSX(keys[i][j], a);
+        }
+    }
+    a = LSX(keys[4][0], a);
+    a = X(keys[4][1], a);
+    return a;
 }
 
 uint8_t getRemainder(uint16_t dividend, uint16_t divisor) {
@@ -312,23 +347,22 @@ int main() {
         printf("%02x", c.b[15 - i]);
     }
     printf("\n");
-    uint128 k1;
-    uint128 k2;
+    uint128* k = malloc(2*sizeof(uint128));
     uint128 c1;
-    k1.qw[0] = 0x0011223344556677;
-    k1.qw[1] = 0x8899aabbccddeeff;
-    k2.qw[0] = 0x0123456789abcdef;
-    k2.qw[1] = 0xfedcba9876543210;
+    k[0].qw[0] = 0x0011223344556677;
+    k[0].qw[1] = 0x8899aabbccddeeff;
+    k[1].qw[0] = 0x0123456789abcdef;
+    k[1].qw[1] = 0xfedcba9876543210;
     c1.qw[0] = 0x5d27bd10dd849401;
     c1.qw[1] = 0x6ea276726c487ab8;
-    c = LSX(k1, c1);
+    c = LSX(k[0], c1);
     for (i = 0; i < 16; ++i) {
         printf("%02x", c.b[15 - i]);
     }
     printf("\n");
     c1.qw[0] = 0x5d27bd10dd849401;
     c1.qw[1] = 0x6ea276726c487ab8;
-    uint128* tmp = F(c1, k1, k2);
+    uint128* tmp = F(c1, k);
     c = tmp[0];
     for (i = 0; i < 16; ++i) {
         printf("%02x", c.b[15 - i]);
@@ -350,6 +384,29 @@ int main() {
         }
         printf("\n");
     }
+    printf("\n");
+    printf("___________________________________________");
+    printf("\n");
+    int z;
+    uint128 **keys = expandKeys(k, tmp2);
+    for (i = 0; i < 5; ++i) {
+        for (j = 0; j < 2; ++j) {
+            for (z = 0; z < 16; ++z) {
+                printf("%02x", keys[i][j].b[15 - z]);
+            }
+            printf(" ");
+        }
+        printf("\n");
+    }
 
+    uint128 text;
+    text.qw[0] = 0xffeeddccbbaa9988;
+    text.qw[1] = 0x1122334455667700;
+    text = crypto(text, k);
+    printf("\n");
+    for (j = 0; j < 16; ++j) {
+        printf("%02x", text.b[15 - j]);
+    }
+    printf("\n");
     return 0;
 }
