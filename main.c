@@ -82,7 +82,17 @@ uint128 reverseL(uint128 a);
 
 uint128* F(uint128 c, uint128* k);
 
+uint128 LSX(uint128 a0, uint128 a1);
+
+uint128 reverseSLX(uint128 a0, uint128 a1);
+
 uint128* itConsts();
+
+uint128** expandKeys(uint128* key256, uint128* itConsts);
+
+uint128 crypto(uint128 a, uint128* k);
+
+uint128 decrypto(uint128 a, uint128* k);
 
 uint8_t getRemainder(uint16_t dividend, uint16_t divisor);
 
@@ -243,9 +253,6 @@ uint128 crypto(uint128 a, uint128* k){
     uint128** keys = expandKeys(k , consts);
     uint16_t i = 0;
     uint16_t j = 0;
-    printf("\n");
-    printf("\n");
-    printf("\n");
     for (i = 0; i < 4; ++i) {
         for (j = 0; j < 2; ++j) {
            a = LSX(keys[i][j], a);
@@ -261,9 +268,6 @@ uint128 decrypto(uint128 a, uint128* k){
     uint128** keys = expandKeys(k , consts);
     uint16_t i = 0;
     uint16_t j = 0;
-    printf("\n");
-    printf("\n");
-    printf("\n");
     for (i = 0; i < 4; ++i) {
         for (j = 0; j < 2; ++j) {
             a = reverseSLX(keys[4 - i][1 - j], a);
@@ -395,7 +399,7 @@ int main() {
         printf("%02x", c.b[15 - i]);
     }
     printf("\n");
-    printf("___________________________________________");
+    printf("___________________________________________[consts]vvv");
     printf("\n");
     uint128* tmp2 = itConsts();
     int j;
@@ -407,7 +411,7 @@ int main() {
         printf("\n");
     }
     printf("\n");
-    printf("___________________________________________");
+    printf("___________________________________________[consts]^^^");
     printf("\n");
     int z;
     uint128 **keys = expandKeys(k, tmp2);
