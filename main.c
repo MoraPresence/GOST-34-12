@@ -198,6 +198,10 @@ uint128 LSX(uint128 a0, uint128 a1) {
     return L(S(X(a0,a1)));
 }
 
+uint128 reverseSLX(uint128 a0, uint128 a1){
+    return reverseS(reverseL(X(a0, a1)));
+}
+
 uint128* itConsts() {
     uint128* itConsts = malloc(32*sizeof(uint128));
     int i;
@@ -249,6 +253,24 @@ uint128 crypto(uint128 a, uint128* k){
     }
     a = LSX(keys[4][0], a);
     a = X(keys[4][1], a);
+    return a;
+}
+
+uint128 decrypto(uint128 a, uint128* k){
+    uint128* consts = itConsts();
+    uint128** keys = expandKeys(k , consts);
+    uint16_t i = 0;
+    uint16_t j = 0;
+    printf("\n");
+    printf("\n");
+    printf("\n");
+    for (i = 0; i < 4; ++i) {
+        for (j = 0; j < 2; ++j) {
+            a = reverseSLX(keys[4 - i][1 - j], a);
+        }
+    }
+    a = reverseSLX(keys[0][1], a);
+    a = X(keys[0][0], a);
     return a;
 }
 
@@ -403,6 +425,13 @@ int main() {
     text.qw[0] = 0xffeeddccbbaa9988;
     text.qw[1] = 0x1122334455667700;
     text = crypto(text, k);
+    printf("\n");
+    for (j = 0; j < 16; ++j) {
+        printf("%02x", text.b[15 - j]);
+    }
+    printf("\n");
+
+    text = decrypto(text, k);
     printf("\n");
     for (j = 0; j < 16; ++j) {
         printf("%02x", text.b[15 - j]);
